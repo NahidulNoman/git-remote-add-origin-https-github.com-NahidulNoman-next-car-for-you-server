@@ -1,1 +1,4 @@
 node_modules
+makeAPI.js
+details.js
+.env
