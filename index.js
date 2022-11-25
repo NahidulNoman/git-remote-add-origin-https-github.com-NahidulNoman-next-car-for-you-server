@@ -16,6 +16,27 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
+
+
+// jwt middle wear
+function verifyJWT(req, res, next) {
+  const authHeader = req.headers.authorization;
+  console.log(authHeader);
+  if (!authHeader) {
+      return res.status(401).send('unauthorized access');
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  jwt.verify(token, process.env.TOKEN, function (err, decoded) {
+      if (err) {
+          return res.status(403).send({ message: 'forbidden access' })
+      }
+      req.decoded = decoded;
+      next();
+  })
+};
+
 async function run() {
   try {
     const categoryCollection = client.db("nextCarSell").collection("category");
@@ -28,9 +49,9 @@ async function run() {
     const usersCollection = client
       .db("nextCarSell")
       .collection("users");
-    const addProductCollection = client
-      .db("nextCarSell")
-      .collection("addProduct");
+    // const addProductCollection = client
+    //   .db("nextCarSell")
+    //   .collection("addProduct");
 
       // JWT token
       app.get('/jwt', async (req, res) => {
@@ -55,16 +76,17 @@ async function run() {
     });
 
     // get home page category api
-    app.get("/category", async (req, res) => {
+    app.get("/category",  async (req, res) => {
       const query = {};
       const result = await categoryCollection.find(query).toArray();
       res.send(result);
     });
 
     // category details api
-    app.get("/categoryDetails/:id", async (req, res) => {
-      const id = parseInt(req.params.id);
-      const filter = { category_id: id };
+    app.get("/categoryDetails/:category", async (req, res) => {
+      const product = req.params.category;
+      console.log(product)
+      const filter = { category_id: product };
       const result = await categoryDetailsCollection.find(filter).toArray();
       res.send(result);
     });
@@ -86,7 +108,7 @@ async function run() {
     // add product 
     app.post('/addProduct', async(req,res) => {
         const product = req.body;
-        const result = await addProductCollection.insertOne(product);
+        const result = await categoryDetailsCollection.insertOne(product);
         res.send(result);
     });
 
