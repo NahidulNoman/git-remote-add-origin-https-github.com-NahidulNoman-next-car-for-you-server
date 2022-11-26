@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 5000;
 const jwt = require('jsonwebtoken');
 require("dotenv").config();
@@ -49,6 +49,9 @@ async function run() {
     const usersCollection = client
       .db("nextCarSell")
       .collection("users");
+    const homesCollection = client
+      .db("nextCarSell")
+      .collection("homes");
     // const addProductCollection = client
     //   .db("nextCarSell")
     //   .collection("addProduct");
@@ -69,10 +72,10 @@ async function run() {
     // get data from signup
     app.post('/users', async(req,res) => {
       const user = req.body;
-      console.log(user);
+      // console.log(user);
       const result = await usersCollection.insertOne(user);
       res.send(result);
-      console.log(result);
+      // console.log(result);
     });
 
     // get home page category api
@@ -100,9 +103,21 @@ async function run() {
 
     // get my orders api
     app.get('/bookings', async (req,res) => {
-        const bookings = req.body;
-        const result = await bookingsCollection.find(bookings).toArray();
+        const bookings = req.query.email;
+      //   const decodedEmail = req.decoded.email;
+      //   const query = { email: decodedEmail };
+      //   const user = await usersCollection.findOne(query);
+      // console.log(user);
+      //   if (user?.role === "Buyer") {
+      //     return res.status(401).send({ message: "forbidden r access" });
+      //   };
+        const filter = {email : bookings}
+        const result = await bookingsCollection.find(filter).toArray();
         res.send(result);
+
+        // console.log(bookings);
+       
+        // console.log(result);
     });
 
     // add product 
@@ -111,6 +126,50 @@ async function run() {
         const result = await categoryDetailsCollection.insertOne(product);
         res.send(result);
     });
+
+    // my product get by email
+    app.get('/myProduct', async (req,res) => {
+      const email = req.query.email;
+      const filter = {email : email};
+      const result = await categoryDetailsCollection.find(filter).toArray();
+      res.send(result);
+    });
+
+    // my product delete 
+    app.delete('/myProduct/:id', async (req,res) => {
+      const id = req.params.id;
+      const query = {_id: ObjectId(id)};
+      const result = await categoryDetailsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // home page products api
+    app.post('/homeProducts', async (req,res) => {
+      const homePage = req.body;
+      const result = await homesCollection.insertOne(homePage);
+      res.send(result);
+    });
+
+    // app.get("/users/:email", async (req, res) => {
+    //   const email = req.params.email;
+    //   const query = { email };
+    //   const user = await usersCollection.findOne(query);
+    //   // console.log(user,email)
+    //   res.send({ isAdmin: user?.role === 'admin' });
+    // });
+
+    // app.get('/seller' , async(req,res) => {
+    //     const filter = {};
+    //     const option = {upsert : true};
+    //     const updateDoc = {
+    //       $set: {
+    //         email : ''
+    //       }
+    //     };
+    //     const result = await categoryDetailsCollection.updateMany(filter,updateDoc,option);
+    //     res.send(result);
+    //     console.log(result);
+    //   });
 
   } finally {
   }
