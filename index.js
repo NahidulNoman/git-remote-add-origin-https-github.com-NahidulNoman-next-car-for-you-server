@@ -53,6 +53,9 @@ async function run() {
     const homesCollection = client
       .db("nextCarSell")
       .collection("homes");
+    const paymentsCollection = client
+      .db("nextCarSell")
+      .collection("payments");
     // const addProductCollection = client
     //   .db("nextCarSell")
     //   .collection("addProduct");
@@ -174,6 +177,24 @@ async function run() {
         res.send({
           clientSecret: paymentIntent.client_secret,
         });
+      });
+
+      // payment
+      app.post('/payment', async (req,res) => {
+        const payment = req.body;
+        const result = await paymentsCollection.insertOne(payment);
+  
+        const id = payment.bookingId
+              const filter = {_id: ObjectId(id)}
+              const updatedDoc = {
+                  $set: {
+                      paid: true,
+                      transactionId: payment.transactionId
+                  }
+              }
+              const updatedResult = await bookingsCollection.updateOne(filter, updatedDoc)
+              console.log(result,'and', updatedResult)
+        res.send(result);
       });
 
     // app.get("/users/:email", async (req, res) => {
