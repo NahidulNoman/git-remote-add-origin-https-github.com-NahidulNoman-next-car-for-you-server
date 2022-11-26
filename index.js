@@ -5,6 +5,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 5000;
 const jwt = require('jsonwebtoken');
 require("dotenv").config();
+const stripe = require("stripe")(process.env.KEY);
 
 // middle wear
 app.use(cors());
@@ -151,10 +152,29 @@ async function run() {
     });
 
     app.get('/homeProducts', async (req,res) => {
-      const home = {};
+      const email = req.query.email;
+      const home = {email : email};
       const result = await homesCollection.find(home).toArray();
       res.send(result);
-    })
+    });
+
+      // payment intention
+      app.post('/create-payment-intent', async (req,res) => {
+        const booking = req.body;
+        const price = booking.price;
+        const amount = price * 100;
+  
+        const paymentIntent = await stripe.paymentIntents.create({
+          currency: "usd",
+          amount,
+          "payment_method_types": [
+            "card"
+          ],
+        });
+        res.send({
+          clientSecret: paymentIntent.client_secret,
+        });
+      });
 
     // app.get("/users/:email", async (req, res) => {
     //   const email = req.params.email;
