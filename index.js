@@ -150,6 +150,12 @@ async function run() {
       res.send(result);
     });
 
+    app.get('/homeProducts', async (req,res) => {
+      const home = {};
+      const result = await homesCollection.find(home).toArray();
+      res.send(result);
+    })
+
     // app.get("/users/:email", async (req, res) => {
     //   const email = req.params.email;
     //   const query = { email };
