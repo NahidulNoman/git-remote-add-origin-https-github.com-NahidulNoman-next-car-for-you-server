@@ -203,7 +203,7 @@ async function run() {
       const email = req.params.email;
       const query = { email };
       const user = await usersCollection.findOne(query);
-      console.log(user,email)
+      // console.log(user,email)
       res.send({ isBuyer: user?.role === 'Buyer' });
     });
 
@@ -212,8 +212,17 @@ async function run() {
       const email = req.params.email;
       const query = { email };
       const user = await usersCollection.findOne(query);
-      console.log(user,email)
+      // console.log(user,email)
       res.send({ isSeller: user?.role === 'Seller' });
+    });
+
+    // find admin
+    app.get("/userAdmin/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const user = await usersCollection.findOne(query);
+      console.log(user,email)
+      res.send({ isAdmin: user?.role === 'Admin' });
     });
 
     // app.get('/seller' , async(req,res) => {
