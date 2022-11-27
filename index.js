@@ -69,7 +69,7 @@ async function run() {
             const token = jwt.sign({ email }, process.env.TOKEN, { expiresIn: '1h' })
             return res.send({ accessToken: token });
         }
-        console.log(user);
+        // console.log(user);
         res.status(403).send({ accessToken: '' })
     });
 
@@ -92,7 +92,7 @@ async function run() {
     // category details api
     app.get("/categoryDetails/:category", async (req, res) => {
       const product = req.params.category;
-      console.log(product)
+      // console.log(product)
       const filter = { category_id: product };
       const result = await categoryDetailsCollection.find(filter).toArray();
       res.send(result);
@@ -106,15 +106,16 @@ async function run() {
     });
 
     // get my orders api
-    app.get('/bookings', async (req,res) => {
+    app.get('/bookings',verifyJWT, async (req,res) => {
         const bookings = req.query.email;
-      //   const decodedEmail = req.decoded.email;
-      //   const query = { email: decodedEmail };
-      //   const user = await usersCollection.findOne(query);
-      // console.log(user);
-      //   if (user?.role === "Buyer") {
-      //     return res.status(401).send({ message: "forbidden r access" });
-      //   };
+        console.log(bookings)
+        const decodedEmail = req.decoded.email;
+        console.log(decodedEmail,bookings)
+
+        if(bookings !== decodedEmail){
+          return res.status(401).send({ message: "forbidden r access" });
+        };
+
         const filter = {email : bookings}
         const result = await bookingsCollection.find(filter).toArray();
         res.send(result);
@@ -193,17 +194,27 @@ async function run() {
                   }
               }
               const updatedResult = await bookingsCollection.updateOne(filter, updatedDoc)
-              console.log(result,'and', updatedResult)
+              // console.log(result,'and', updatedResult)
         res.send(result);
       });
 
-    // app.get("/users/:email", async (req, res) => {
-    //   const email = req.params.email;
-    //   const query = { email };
-    //   const user = await usersCollection.findOne(query);
-    //   // console.log(user,email)
-    //   res.send({ isAdmin: user?.role === 'admin' });
-    // });
+    // find buyer
+    app.get("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const user = await usersCollection.findOne(query);
+      console.log(user,email)
+      res.send({ isBuyer: user?.role === 'Buyer' });
+    });
+
+    // find seller
+    app.get("/userSeller/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const user = await usersCollection.findOne(query);
+      console.log(user,email)
+      res.send({ isSeller: user?.role === 'Seller' });
+    });
 
     // app.get('/seller' , async(req,res) => {
     //     const filter = {};
