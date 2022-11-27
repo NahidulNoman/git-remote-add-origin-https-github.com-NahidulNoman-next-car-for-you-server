@@ -225,6 +225,36 @@ async function run() {
       res.send({ isAdmin: user?.role === 'Admin' });
     });
 
+    // get all sellers in admin route
+    app.get('/allSellers', async (req,res) => {
+      const query = {role : 'Seller'};
+      const result = await usersCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // get all buyers in admin route
+    app.get('/allBuyers', async (req,res) => {
+      const query = {role : 'Buyer'};
+      const result = await usersCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // delete buyer
+    app.delete('/deleteBuyer/:id', async (req,res) => {
+      const id = req.params.id;
+      const query = {_id : ObjectId(id)};
+      const result = await usersCollection.deleteOne(query);
+      res.send(result);
+    });
+   
+    // delete seller
+    app.delete('/deleteSeller/:id', async (req,res) => {
+      const id = req.params.id;
+      const query = {_id : ObjectId(id)};
+      const result = await usersCollection.deleteOne(query);
+      res.send(result);
+    });
+
     // app.get('/seller' , async(req,res) => {
     //     const filter = {};
     //     const option = {upsert : true};
