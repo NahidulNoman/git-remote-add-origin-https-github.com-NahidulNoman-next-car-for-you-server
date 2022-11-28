@@ -108,9 +108,9 @@ async function run() {
     // get my orders api
     app.get('/bookings',verifyJWT, async (req,res) => {
         const bookings = req.query.email;
-        console.log(bookings)
+        // console.log(bookings)
         const decodedEmail = req.decoded.email;
-        console.log(decodedEmail,bookings)
+        // console.log(decodedEmail,bookings)
 
         if(bookings !== decodedEmail){
           return res.status(401).send({ message: "forbidden r access" });
@@ -133,7 +133,7 @@ async function run() {
     });
 
     // my product get by email
-    app.get('/myProduct', async (req,res) => {
+    app.get('/myProduct',verifyJWT, async (req,res) => {
       const email = req.query.email;
       const filter = {email : email};
       const result = await categoryDetailsCollection.find(filter).toArray();
@@ -141,7 +141,7 @@ async function run() {
     });
 
     // my product delete 
-    app.delete('/myProduct/:id', async (req,res) => {
+    app.delete('/myProduct/:id',verifyJWT, async (req,res) => {
       const id = req.params.id;
       const query = {_id: ObjectId(id)};
       const result = await categoryDetailsCollection.deleteOne(query);
@@ -155,8 +155,10 @@ async function run() {
       res.send(result);
     });
 
+    // get home products
     app.get('/homeProducts', async (req,res) => {
       const email = req.query.email;
+      // console.log('home products', req.headers.authorization)
       const home = {email : email};
       const result = await homesCollection.find(home).toArray();
       res.send(result);
@@ -260,10 +262,10 @@ async function run() {
     //     const option = {upsert : true};
     //     const updateDoc = {
     //       $set: {
-    //         email : ''
+    //         image : ''
     //       }
     //     };
-    //     const result = await categoryDetailsCollection.updateMany(filter,updateDoc,option);
+    //     const result = await categoryCollection.updateMany(filter,updateDoc,option);
     //     res.send(result);
     //     console.log(result);
     //   });
